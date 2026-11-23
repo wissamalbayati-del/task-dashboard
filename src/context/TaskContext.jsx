@@ -19,7 +19,10 @@ export const TaskProvider = ({ children }) => {
 
   useEffect(() => {
     // Update stats whenever tasks change
-    const completed = tasks.filter(task => task.isCompleted).length;
+    const completed = tasks.reduce(
+      (count, task) => count + (task.isCompleted ? 1 : 0),
+      0
+    );
     setStats({
       total: tasks.length,
       completed,
@@ -49,19 +52,27 @@ export const TaskProvider = ({ children }) => {
   const completeAllTasks = (taskIds = null) => {
     if (taskIds) {
       // Complete specific tasks (for task lists)
-      setTasks(tasks.map(task => 
-        taskIds.includes(task.id) ? { ...task, isCompleted: true } : task
-      ));
+      const taskIdSet = new Set(taskIds);
+      setTasks(currentTasks =>
+        currentTasks.map(task =>
+          taskIdSet.has(task.id) ? { ...task, isCompleted: true } : task
+        )
+      );
     } else {
       // Complete all tasks
-      setTasks(tasks.map(task => ({ ...task, isCompleted: true })));
+      setTasks(currentTasks =>
+        currentTasks.map(task => ({ ...task, isCompleted: true }))
+      );
     }
   };
 
   const deleteCompletedTasks = (taskIds = null) => {
     if (taskIds && taskIds.length > 0) {
       // Delete specific completed tasks (for task lists)
-      setTasks(tasks.filter(task => !taskIds.includes(task.id)));
+      const taskIdSet = new Set(taskIds);
+      setTasks(currentTasks =>
+        currentTasks.filter(task => !taskIdSet.has(task.id))
+      );
     } else {
       // Delete all completed tasks
       setTasks(tasks.filter(task => !task.isCompleted));
