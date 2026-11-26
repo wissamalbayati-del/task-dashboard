@@ -227,6 +227,15 @@ describe('TaskBoard Component', () => {
     expect(screen.queryByTestId('mocked-list-add-task')).not.toBeInTheDocument();
   });
 
+  test('memoizes list filtering when unrelated board state changes', () => {
+    render(<TaskBoard />);
+    const callsAfterRender = mockGetFilteredTasks.mock.calls.length;
+
+    fireEvent.click(screen.getByTestId('manage-tags-button'));
+
+    expect(mockGetFilteredTasks).toHaveBeenCalledTimes(callsAfterRender);
+  });
+
   test('completes all tasks in a list when complete all button is clicked', () => {
     render(<TaskBoard />);
     

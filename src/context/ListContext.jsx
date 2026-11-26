@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 import { DataHydrationService } from '../common/utils/DataHydrationService';
 
 // Create the list context
@@ -41,7 +41,7 @@ export const ListProvider = ({ children }) => {
   };
 
   // Filter tasks according to the task list's filter configuration
-  const getFilteredTasks = (filterConfig, tasks) => {
+  const getFilteredTasks = useCallback((filterConfig, tasks) => {
     if (!filterConfig || filterConfig.length === 0) {
       return tasks;
     }
@@ -58,7 +58,7 @@ export const ListProvider = ({ children }) => {
         return true;
       });
     });
-  };
+  }, []);
 
   return (
     <ListContext.Provider

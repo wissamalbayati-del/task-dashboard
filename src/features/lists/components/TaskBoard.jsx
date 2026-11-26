@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, CheckCircleIcon, TrashIcon, TagIcon } from '@heroicons/react/24/outline';
 import TaskList from '../../tasks/components/TaskList';
@@ -17,6 +17,26 @@ function TaskBoard() {
   const [editingListId, setEditingListId] = useState(null);
   const [showTagManager, setShowTagManager] = useState(false);
   const [addingTaskToListId, setAddingTaskToListId] = useState(null);
+
+  const filteredTasksByList = useMemo(() => {
+    const result = new Map();
+
+    taskLists.forEach(list => {
+      const filteredTasks = getFilteredTasks(list.filters, tasks);
+      let completedCount = 0;
+
+      filteredTasks.forEach(task => {
+        if (task.isCompleted) completedCount += 1;
+      });
+
+      result.set(list.id, {
+        filteredTasks,
+        completedTasksCount: completedCount
+      });
+    });
+
+    return result;
+  }, [taskLists, tasks, getFilteredTasks]);
 
   // Start editing a task list's configuration
   const handleEditTaskList = (id) => {
@@ -112,8 +132,7 @@ function TaskBoard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4" data-testid="task-lists-container">
         {taskLists.map(list => {
-          const filteredTasks = getFilteredTasks(list.filters, tasks);
-          const completedTasksCount = filteredTasks.filter(task => task.isCompleted).length;
+          const { filteredTasks, completedTasksCount } = filteredTasksByList.get(list.id);
           const hasCompletedTasks = completedTasksCount > 0;
           const allTasksCompleted = filteredTasks.length > 0 && filteredTasks.every(task => task.isCompleted);
           
